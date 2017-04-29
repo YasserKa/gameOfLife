@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+# Turn the RewriteEngine On
+RewriteEngine On
+
+# Perform a Rewrite if the requested 
+# URI does not match an existing file or directory name
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Executing index.php instead
+RewriteRule (^[^\/]+$) /FinalProject/ [QSA,NC,L]
+</IfModule>

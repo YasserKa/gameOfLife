@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf8">
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0">
+        <link rel = "stylesheet" type = "text/css" href = "css/main.css" />
+        <title>Conway's Game of Life</title>
+    </head>
+    <body>
+        <div id="container">
+           
+            <div id="controls" class="center">
+                <button id="autoNavigateButton">Navigate</button>
+                <button id="settings">Settings</button>
+                <!--<button id="helpButton">Help</button>-->
+                <div id="menue">
+                    <div id="ingameSettings">
+                        <!--- Pause / Speed -->
+                        <button id="status">Pause</button>
+                        <input style="margin-top:10px"id="speedSlider" type="range" min="1" max="10" step="1" value="1"/>
+                        <!--<label id="speedValue" value='1'/>-->
+                        <!-- Game Rules -->
+                        <div id="gameRules">
+                            <div id="usedRules"></div>
+                            <div id="notUsedRules">
+                                <div class="drag" id="XY" draggable="true"><p>XY</p></div>
+                                <div class="drag" id="XZ" draggable="true"><p>XZ</p></div>
+                                <div class="drag" id="YZ" draggable="true"><p>YZ</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Game generator -->
+                    <div id="newGame">
+                        <label for="xDim">X</label>
+                        <input id='xDim' class="dimInput" type="text" value='3' maxlength="4"/>
+                        <label for="yDim">Y</label>
+                        <input id='yDim' class="dimInput" type="text" value='3' maxlength="4"/>
+                        <label for="muzDimsic">Z</label>
+                        <input id='zDim' class="dimInput" type="text" value='3' maxlength="4"/>
+                        <button id='newGameButton'>Generate</button>
+                    </div>
+                <!-- Game Loading -->
+                    <div id="loadGame">
+                        <select name="select" id="availableGamesSelect">
+                        </select>
+                        <button id='loadGameButton'>Load</button>
+                    </div>
+                    <ul id="input3D">
+                        <li><input class="rangeInput" id='productionRange' type="text" maxlength="30" placeholder="Production Range"/></li>
+                        <li><input class="rangeInput" id='deathRange' type="text" maxlength="30" placeholder="Death Range"/></li>
+                        <li><button id='start3D'>3D Start</button></li>
+                        <!--<li><button id='shareGameButton'>Share Game</button> </li>-->
+                        
+                    </ul>
+                    
+                    <div id="gameStatus">
+                        <p>Generation: <span id="generation">1</span></p>
+                        <p>Produced: <span id="produced">0</span></p>
+                        <p>Died: <span id="died">0</span></p>
+                        <p>Stayed Alive: <span id="stayedAlive">0</span></p>
+                        <p>Stayed Dead: <span id="stayedDead">0</span></p>
+                    </div>
+                </div>
+                <div id="helpPanel">
+                    Features: 
+                    <ul>
+                        <li>Random Generate 3D games</li>
+                        <li>Load Games</li>
+                        <li>Choose 2D planes drag/drop to make 2D games</li>
+                        <li>3D games by passing Ranges between 0-26</li>
+                        <li>Camera Naviagation with mouse/wheel/AWSD</li>                    
+                    </ul>
+                    Bugs:<ul>
+                        <li>Drag/Drop</li>
+                        <li>Input validation</li>
+                    </ul>
+                    <a href="https://goo.gl/d8U8a5"/>BitBucket Account</a>
+                </div>
+            </div>
+             <canvas id="c">
+            </canvas>
+        </div>
+        
+    </body>
+    <!-- WEBGL SHADERS -->
+    <script id="vs" type="notjs">
+        uniform mat4 u_worldViewProjection;
+
+        attribute vec4 position;
+        attribute vec3 offset;
+        attribute vec3 normal;
+        attribute float on;
+        attribute float alpha;
+
+        vec4 afterScaling;
+        vec4 afterTranslation;
+        mat4 u_world;
+
+        uniform vec3 u_translation;
+        uniform vec3 u_scale;
+        varying vec3 v_normal;
+        varying float v_alpha;
+
+        void main() {
+        v_alpha = alpha;
+
+        if (on < .5) {
+            gl_Position = vec4(20, 20, 20, 1);
+            return;
+        }
+        gl_Position = u_worldViewProjection * (position + vec4(offset, 0));
+        return;
+        gl_Position = position;
+        }
+    </script>
+    <script id="fs" type="notjs">
+        precision mediump float;
+
+        uniform vec3 u_color;
+        varying float v_alpha;
+
+        void main() {
+            float alpha = v_alpha;
+            gl_FragColor = vec4(u_color, alpha);
+        }
+    </script>
+    <script src="bower_components/twgl.js/dist/3.x/twgl-full.min.js"></script>
+    <script src="bower_components/chroma-js/docs/libs/chroma.min.js"></script>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="js/config.js" type="text/javascript" ></script>
+    <script src="js/connection.js" type="text/javascript" ></script>
+    <script src="js/game.js" type="text/javascript" ></script>
+    <script src="js/ui.js" type="text/javascript" ></script>
+    <script src="js/main.js" type="text/javascript"></script>
+    
+</html>
+
+
