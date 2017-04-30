@@ -1,0 +1,20 @@
+{
+  "name": "gameoflife",
+  "version": "0.2.0",
+  "description": "Conway's Game of Life in 3D",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://bitbucket.org/YasserKaddoura/sef_57_yasser-kaddoura.git"
+  },
+  "author": "Yasser Kaddoura",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/YasserKaddoura/sef_57_yasser-kaddoura#readme",
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-google": "^0.7.1"
+  }
+}

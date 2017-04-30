@@ -8,5 +8,5 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
 # Executing index.php instead
-RewriteRule (^[^\/]+$) /FinalProject/ [QSA,NC,L]
+RewriteRule (^[^\/]+$) /gameOfLife/ [QSA,NC,L]
 </IfModule>

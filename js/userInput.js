@@ -13,17 +13,25 @@ $(function() {
 /**
  * Make settings visible/invisible
  */
-function settingsStatus() {
-    let style = window.getComputedStyle(menue);
+function setInGameSettVisi() {
+    const menue = document.getElementById('menue');
+    setVisibility(menue);
+}
+
+/**
+ * Sets the passes element visibility
+ * @param {any} element DOM element
+ */
+function setVisibility(element) {
+    let style = window.getComputedStyle(element);
     let visibility = style.getPropertyValue('display');
     if (visibility === 'none') {
         visibility = 'block';
     } else {
         visibility = 'none';
     }
-    menue.style.display = visibility;
+    element.style.display = visibility;
 }
-
 /**
  * Make helpPanel visible/invisible
  */
@@ -41,7 +49,7 @@ function helpStatus() {
 const autoNavigate = function() {
     theta += sens*0.009;
     phi = 0.5;
-    let depth = Math.max(zDim, xDim, yDim);
+    let depth = Math.max(userInput.z, userInput.x, userInput.y);
     cameraZ = (depth) * size;
     if (autoNav) {
         setTimeout(autoNavigate, 1);
@@ -54,7 +62,6 @@ const triggerAutoNav = function() {
         autoNavigate();
     }
 };
-  /*    ========================= GAME STATUS ========================= */
 
 /**
  * Parses a string to an array of integers(range)
@@ -104,9 +111,9 @@ function resetGameRules() {
 const pause = function() {
     paused = !paused;
     if (paused) {
-        statusButton.innerHTML = 'Resume';
+        stopButton.innerHTML = 'Resume';
     } else {
-        statusButton.innerHTML = 'Pause';
+        stopButton.innerHTML = 'Pause';
     }
 };
 
@@ -126,10 +133,14 @@ const start3DGameEvent = function() {
  * Starts a new game
  */
 const newGameEvent = function() {
-	let xDim = xDimInput.value;
-	let yDim = yDimInput.value;
-	let zDim = zDimInput.value;
-    newGame(xDim, yDim, zDim, false);
+    userInput.generateWay = document.querySelector(
+                  'input[name="generateWay"]:checked'
+                ).id;
+    userInput.x = xInput.value;
+    userInput.y = yInput.value;
+    userInput.z = zInput.value;
+    userInput.gameSelected = false;
+    newGame(userInput);
 };
 
 /**
@@ -138,57 +149,13 @@ const newGameEvent = function() {
 const loadGameEvent = function() {
 	let gameSelected = availableGamesSelect.value;
     $.getJSON('gameList.json', function(json) {
-        newGame(0, 0, 0, json[gameSelected]);
+        let userInput = {
+            gameSelected: json[gameSelected],
+            generateWay: generateWay.LOAD,
+        };
+        newGame(userInput);
     });
     resetGameRules();
-};
-
-const dragStart = function(event) {
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('Text', event.target.getAttribute('id'));
-    event.dataTransfer.setDragImage(event.target, 0, 0);
-    return true;
-};
-
-const dragEnter = function(event) {
-   event.preventDefault();
-   return true;
-};
-
-const dragOver = function(event) {
-     event.preventDefault();
-};
-
-const dragDrop = function(event) {
-    let rule = event.dataTransfer.getData('Text');
-    if (gameRules.hasOwnProperty(rule)) {
-        event.target.appendChild(document.getElementById(rule));
-        event.stopPropagation();
-        return false;
-   }
-};
-
-/**
- * Add a rule to the game rules
- * @param {*} event
- */
-const addRule = function(event) {
-    let rule = event.dataTransfer.getData('Text');
-    if (gameRules.hasOwnProperty(rule) && !rulesUsed.includes(rule)) {
-        rulesUsed.push(rule);
-    }
-};
-
-/**
- * Remove a rule in the game
- * @param {*} event
- */
-const removeRule = function(event) {
-    let rule = event.dataTransfer.getData('Text');
-    let index = rulesUsed.indexOf(rule);
-    if (gameRules.hasOwnProperty(rule)) {
-        rulesUsed.splice(index, 1);
-    }
 };
 
 /**
@@ -229,68 +196,57 @@ const inputType = {
     range: 0,
     number: 1,
 };
+
 const range = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     '-', ',', 'Backspace',
 ];
+
 const numbers = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'Backspace',
 ];
 
-
 /**
  * GLOBAL letIABLES
  */
-let settingsButton = document.getElementById('settings');
-let helpButton = document.getElementById('helpButton');
-let statusButton = document.getElementById('status');
-let helpPanel = document.getElementById('helpPanel');
-let menue = document.getElementById('menue');
-let newGameButton = document.getElementById('newGameButton');
-let loadGameButton = document.getElementById('loadGameButton');
-let availableGamesSelect = document.getElementById('availableGamesSelect');
+const settingsButton = document.getElementById('settingsButton');
+const helpButton = document.getElementById('helpButton');
+const stopButton = document.getElementById('stopButton');
+const helpPanel = document.getElementById('helpPanel');
+
+// Loading
+const loadGameButton = document.getElementById('loadGameButton');
+const availableGamesSelect = document.getElementById('availableGamesSelect');
 availableGamesSelect.addEventListener('change', function(event) {
     send(inGameAction.TYPING, this.id, this.value);
 });
 // Input to generate new map
-let xDimInput = document.getElementById('xDim');
-let yDimInput = document.getElementById('yDim');
-let zDimInput = document.getElementById('zDim');
-// 2D planes drag/drop
-let usedRules = document.getElementById('usedRules');
-let notUsedRules = document.getElementById('notUsedRules');
-let xyRule = document.getElementById('XY');
-let xzRule = document.getElementById('XZ');
-let yzRule = document.getElementById('YZ');
+const xInput = document.getElementById('xDim');
+const yInput = document.getElementById('yDim');
+const zInput = document.getElementById('zDim');
 // Game inforamtion
-let generation = document.getElementById('generation');
-let produced = document.getElementById('produced');
-let died = document.getElementById('died');
-let stayedAlive = document.getElementById('stayedAlive');
-let stayedDead = document.getElementById('stayedDead');
+const generation = document.getElementById('generation');
+const produced = document.getElementById('produced');
+const died = document.getElementById('died');
+const stayedAlive = document.getElementById('stayedAlive');
+const stayedDead = document.getElementById('stayedDead');
 // 3D range
-let productionRange = document.getElementById('productionRange');
-let deathRange = document.getElementById('deathRange');
-let start3D = document.getElementById('start3D');
+const productionRange = document.getElementById('productionRange');
+const deathRange = document.getElementById('deathRange');
+const start3D = document.getElementById('start3D');
 // Auto navigation
-let autoNavigateButton = document.getElementById('autoNavigateButton');
-
-
-
+const autoNavigateButton = document.getElementById('autoNavigateButton');
 
 
 /**
  * EVENT HANDLERS
  */
-settingsButton.addEventListener('click', settingsStatus, false);
+settingsButton.addEventListener('click', setInGameSettVisi, false);
 // helpButton.addEventListener('click', helpStatus, false);
-statusButton.addEventListener('click', pause, false);
-newGameButton.addEventListener('click', newGameEvent, false);
+stopButton.addEventListener('click', pause, false);
 loadGameButton.addEventListener('click', loadGameEvent, false);
 start3D.addEventListener('click', start3DGameEvent, false);
 autoNavigateButton.addEventListener('click', triggerAutoNav, false);
-
-
 
 // Sharing button clicks via websocket
 const buttons = document.getElementsByTagName('button');
@@ -312,20 +268,6 @@ Array.from(rangeInput).forEach(function(element) {
     element.onkeypress = sharedInput;
     element.typeInput = inputType.range;
 });
-
-
-// Dragging EventListener
-usedRules.addEventListener('drop', dragDrop, false);
-usedRules.addEventListener('drop', addRule, false);
-usedRules.addEventListener('dragenter', dragEnter, false);
-usedRules.addEventListener('dragover', dragOver, false);
-notUsedRules.addEventListener('drop', dragDrop, false);
-notUsedRules.addEventListener('drop', removeRule, false);
-notUsedRules.addEventListener('dragenter', dragEnter, false);
-notUsedRules.addEventListener('dragover', dragOver, false);
-xyRule.addEventListener('dragstart', dragStart, false);
-xzRule.addEventListener('dragstart', dragStart, false);
-yzRule.addEventListener('dragstart', dragStart, false);
 
 /**
  * Populate select element with saved games

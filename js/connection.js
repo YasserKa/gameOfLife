@@ -18,7 +18,7 @@ let urlBroken = url.split('/');
 
 let gameId = urlBroken[urlBroken.length-1];
 let conn;
-if(gameId !== '' && urlBroken[urlBroken.length-2] === 'FinalProject') {
+if(gameId !== '' && urlBroken[urlBroken.length-2] === 'gameOfLife') {
     conn = new WebSocket('ws://' + config.webServer + ':8080');
     connect();
     // wsReady = true;

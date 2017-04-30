@@ -20,6 +20,13 @@ select option {
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
 }
 
+ul {
+    list-style: none;
+}
+
+ul > li {
+    padding: 1px;
+}
 input {
     color: #000000;
     padding: 3px;
@@ -62,6 +69,7 @@ canvas {
 #menue {
     margin: 20px;
     padding: 50px;
+    display: none;
 }
 
 button, input, select, 
@@ -69,49 +77,6 @@ button, input, select,
     pointer-events: visible;
 }
 
-/**** DRAG RULES *****/
-.drag {
-    width: 30px;
-    height: 30px;
-    background: rgba(0, 0, 0, 0.3);
-    display: inline-block;
-    position: relative;
-    margin-bottom: 3px;
-    
-}
-
-.drag > p {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 30%;
-    margin: auto;
-    font-size: 0.8em;
-    text-align: center;
-    color: rgba(255,255,255, 0.4);
-}
-#gameRules {
-    margin: 10px;
-}
-
-#usedRules {
-    width: 30px;
-    height: 100px;
-    background: #555555;
-    float: left;
-    padding: 5px;
-}
-
-#notUsedRules {
-    margin-left: 5px;
-    padding: 5px;
-    width: 30px;
-    height: 100px;
-    background:#666666;
-    float: left;
-}
 
 #gameStatus{
     position: absolute;
@@ -161,15 +126,31 @@ button, input, select,
     margin: 10px;
 }
 
-#newGame input[type="text"] {
+.dimInput {
     pointer-events: visible;
     width: 30px;
     text-align: center;
 }
-
-/****** Help Panel ****/
-#helpPanel {
+/****** Map Generation *****/
+#mapGeneratePanel{
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    padding: 8px;
+    text-align: left;
+    font-size: 0.7em;
+    display: none;
     background-color: rgba(220,220,220, 0.5);
+}
+
+#mapGeneratePanel > input {
+    width: 30px;
+    margin-bottom: 5px;
+}
+/****** Panel ****/
+.Panel {
+    background-color: rgba(220,220,220, 0.5);
+    padding: 10px;
     width: 300px;
     margin: 50px auto 0px auto;
     text-align: left;

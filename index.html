@@ -11,33 +11,15 @@
            
             <div id="controls" class="center">
                 <button id="autoNavigateButton">Navigate</button>
-                <button id="settings">Settings</button>
+                <button id="settingsButton">Settings</button>
+                <button id="generateButton">Generate</button>
                 <!--<button id="helpButton">Help</button>-->
                 <div id="menue">
                     <div id="ingameSettings">
                         <!--- Pause / Speed -->
-                        <button id="status">Pause</button>
+                        <button id="stopButton">Pause</button>
                         <input style="margin-top:10px"id="speedSlider" type="range" min="1" max="10" step="1" value="1"/>
                         <!--<label id="speedValue" value='1'/>-->
-                        <!-- Game Rules -->
-                        <div id="gameRules">
-                            <div id="usedRules"></div>
-                            <div id="notUsedRules">
-                                <div class="drag" id="XY" draggable="true"><p>XY</p></div>
-                                <div class="drag" id="XZ" draggable="true"><p>XZ</p></div>
-                                <div class="drag" id="YZ" draggable="true"><p>YZ</p></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Game generator -->
-                    <div id="newGame">
-                        <label for="xDim">X</label>
-                        <input id='xDim' class="dimInput" type="text" value='3' maxlength="4"/>
-                        <label for="yDim">Y</label>
-                        <input id='yDim' class="dimInput" type="text" value='3' maxlength="4"/>
-                        <label for="muzDimsic">Z</label>
-                        <input id='zDim' class="dimInput" type="text" value='3' maxlength="4"/>
-                        <button id='newGameButton'>Generate</button>
                     </div>
                 <!-- Game Loading -->
                     <div id="loadGame">
@@ -48,11 +30,9 @@
                     <ul id="input3D">
                         <li><input class="rangeInput" id='productionRange' type="text" maxlength="30" placeholder="Production Range"/></li>
                         <li><input class="rangeInput" id='deathRange' type="text" maxlength="30" placeholder="Death Range"/></li>
-                        <li><button id='start3D'>3D Start</button></li>
+                        <li><button id='start3D'>Start</button></li>
                         <!--<li><button id='shareGameButton'>Share Game</button> </li>-->
-                        
                     </ul>
-                    
                     <div id="gameStatus">
                         <p>Generation: <span id="generation">1</span></p>
                         <p>Produced: <span id="produced">0</span></p>
@@ -61,7 +41,7 @@
                         <p>Stayed Dead: <span id="stayedDead">0</span></p>
                     </div>
                 </div>
-                <div id="helpPanel">
+                <div class="Panel">
                     Features: 
                     <ul>
                         <li>Random Generate 3D games</li>
@@ -76,6 +56,44 @@
                     </ul>
                     <a href="https://goo.gl/d8U8a5"/>BitBucket Account</a>
                 </div>
+                 <!-- MAP GENERATION PANEL -->
+                <div id="generatingSettings" class="Panel">
+                    <p># Dimensions</p>
+                        <label for="xDim">X</label>
+                        <input type="text" id='xDim' class="dimInput" value='3' maxlength="4"/>
+                        <label for="yDim">Y</label>
+                        <input type="text" id='yDim' class="dimInput" value='3' maxlength="4"/>
+                        <label for="zDim">Z</label>
+                        <input type="text" id='zDim' class="dimInput" value='3' maxlength="4"/>
+                    <hr>
+                    <p>Initial State</p>
+                    <ul>
+                        <li>
+                            <label for="generateRandom" >Random</label>
+                            <input type="radio" id="generateRandom"  name="generateWay"/>
+                        </li>
+                        <li>
+                            <label for="generateUser">User</label>
+                            <input type="radio" id="generateUser"  name="generateWay" checked/>
+                        </li>
+                        <!--<li>
+                            <label for="generateAlpha">Alphabet</label>
+                            <input type="radio" id="generateAlpha"  name="generateWay" disabled/>
+                        </li>-->
+                    </ul>
+                    <hr>
+                    <!--<p>Folder name (If Save is checked)</p>
+                    <label for="generateSave">Save</label>
+                    <input type="checkbox" id="generateSave" disabled/>-->
+                    <button id='generateSubmit'>Submit</button>
+                </div>
+            </div>
+            <div id="mapGeneratePanel">
+                <label for="mapPlane">Z</label>
+                <input id="mapPlane" value='0'>
+                <button id="submitMap"/>K</button>
+                <table id="mapGenerate">
+                </table>
             </div>
              <canvas id="c">
             </canvas>
@@ -130,8 +148,9 @@
     <script src="js/config.js" type="text/javascript" ></script>
     <script src="js/connection.js" type="text/javascript" ></script>
     <script src="js/game.js" type="text/javascript" ></script>
-    <script src="js/ui.js" type="text/javascript" ></script>
     <script src="js/main.js" type="text/javascript"></script>
+    <script src="js/userInput.js" type="text/javascript" ></script>
+    <script src="js/mapGenerator.js" type="text/javascript" ></script>
     
 </html>
 

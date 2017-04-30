@@ -4,23 +4,19 @@
 let game = {
 	/**
 	 * Game Consturctor
-	 * @param {Integer} xDim 	     Number of cells in the x-dimension
-	 * @param {Integer} yDim 	     Number of cells in the y-dimension
-	 * @param {Integer} zDim 	     Number of cells in the z-dimension
-	 * @param {Array}   gameSelected A map of the game if present
+	 * @param {Object} userInput User's input data
 	 */
-	consutructor: function(xDim, yDim, zDim, gameSelected) {
+	consutructor: function(userInput) {
 		// Information about the game
+		// TODO:MAKE IT AS AN OBJECT
 		this.generation = 1;
 		this.produced = 0;
 		this.died = 0;
 		this.stayedDead = 0;
 		this.stayedAlive = 0;
+		this.userInput = userInput;
 
 		this.axis = axis;
-		this.xDim = xDim;
-		this.yDim = yDim;
-		this.zDim = zDim;
 		this.gameSize = this.calcGameSize();
 		// Number of neighbours for each cell
 		this.numNeigh = [[[]]];
@@ -28,12 +24,38 @@ let game = {
 		// Range for the conditions
 		this.deathRange = [];
 		this.produceRange = [];
-
+		console.log(userInput);
 		// Generate a random or a loaded game
-		this.map = gameSelected ? gameSelected : this.randomGenerator();
+		switch(userInput.generateWay) {
+			case generateWay.RANDOM:
+				this.map = this.randomGenerator();
+				myMode = mode.PLAYING;
+				break;
+			case generateWay.USER:
+				this.map = this.generateEmpty();
+				myMode = mode.GENERATING;
+				mapStart();
+				break;
+			case generateWay.LOAD:
+				this.map = userInput.gameSelected;
+				myMode = mode.PLAYING;
+		}
 	},
+	/**
+	 * Set a cell in the map
+	 * @param {Integer} x position of the cell in X-axis
+	 * @param {Integer} y position of the cell in Y-axis
+	 * @param {Integer} z position of the cell in Z-axis
+	 */
+	setCell: function(x, y, z) {
+		this.map[z][y][x] = this.map[z][y][x] === 1 ? 0 : 1;
+	},
+	/**
+	 * Gets the size of the map
+	 * @return {Integer} the size of the map
+	 */
 	calcGameSize: function() {
-		return this.zDim * this.yDim * this.xDim;
+		return this.userInput.z * this.userInput.y * this.userInput.x;
 	},
 	/**
 	 * Generates a random game
@@ -41,12 +63,29 @@ let game = {
 	 */
 	randomGenerator: function() {
 		let array = [[[]]];
-		for (let z = 0; z < this.zDim; z++) {
+		for (let z = 0; z < this.userInput.z; z++) {
 			array[z] = [];
-			for (let y = 0; y < this.yDim; y++) {
+			for (let y = 0; y < this.userInput.y; y++) {
 				array[z][y] = [];
-				for (let x = 0; x < this.xDim; x++) {
+				for (let x = 0; x < this.userInput.x; x++) {
 					array[z][y][x] = Math.floor(Math.random()*2);
+				}
+			}
+		}
+		return array;
+	},
+	/**
+	 * Generates a random game
+	 * @return {Array} A random generated map of the game
+	 */
+	generateEmpty: function() {
+		let array = [[[]]];
+		for (let z = 0; z < this.userInput.z; z++) {
+			array[z] = [];
+			for (let y = 0; y < this.userInput.y; y++) {
+				array[z][y] = [];
+				for (let x = 0; x < this.userInput.x; x++) {
+					array[z][y][x] = 0;
 				}
 			}
 		}
@@ -95,9 +134,9 @@ let game = {
 				return arr1.slice();
 			});
 		});
-		for (let z = 0; z < zDim; z++) {
-			for (let y = 0; y < yDim; y++) {
-				for (let x = 0; x < xDim; x++) {
+		for (let z = 0; z < userInput.z; z++) {
+			for (let y = 0; y < userInput.y; y++) {
+				for (let x = 0; x < userInput.x; x++) {
 					let cell = this.map[z][y][x];
 					let numNeigh = this.get3DNeigh(z, y, x);
 					let nextGenStatus = this.cellNextGen3D(cell, numNeigh);
@@ -279,9 +318,9 @@ let game = {
 	 */
 	getXPlane: function(plane) {
 		array = [[]];
-		for (let z = 0; z < this.zDim; z++) {
+		for (let z = 0; z < this.userInput.z; z++) {
 			array[z] = [];
-			for (let y = 0; y < this.yDim; y++) {
+			for (let y = 0; y < this.userInput.y; y++) {
 				array[z][y] = this.map[z][y][plane];
 			}
 		}
@@ -295,9 +334,9 @@ let game = {
 	 */
 	getYPlane: function(plane) {
 		array = [[]];
-		for (let z = 0; z < this.zDim; z++) {
+		for (let z = 0; z < this.userInput.z; z++) {
 			array[z] = [];
-			for (let x = 0; x < this.xDim; x++) {
+			for (let x = 0; x < this.userInput.x; x++) {
 				array[z][x] = this.map[z][plane][x];
 			}
 		}
@@ -311,9 +350,9 @@ let game = {
 	 */
 	getZPlane: function(plane) {
 		array = [[]];
-		for (let y = 0; y < this.yDim; y++) {
+		for (let y = 0; y < this.userInput.y; y++) {
 			array[y] = [];
-			for (let x = 0; x < this.xDim; x++) {
+			for (let x = 0; x < this.userInput.x; x++) {
 				array[y][x] = this.map[plane][y][x];
 			}
 		}
@@ -347,8 +386,8 @@ let game = {
 	 * @param {Array}   nextmap	  A 3D game
 	 */
 	storeXPlane: function(plane, game2D, nextmap) {
-		for (let z = 0; z < this.zDim; z++) {
-			for (let y = 0; y < this.yDim; y++) {
+		for (let z = 0; z < this.userInput.z; z++) {
+			for (let y = 0; y < this.userInput.y; y++) {
 				nextmap[z][y][plane] = game2D[z][y];
 			}
 		}
@@ -360,8 +399,8 @@ let game = {
 	 * @param {Array}   nextmap	  A 3D game
 	 */
 	storeYPlane: function(plane, game2D, nextmap) {
-		for (let z = 0; z < this.zDim; z++) {
-			for (let x = 0; x < this.xDim; x++) {
+		for (let z = 0; z < this.userInput.z; z++) {
+			for (let x = 0; x < this.userInput.x; x++) {
 				nextmap[z][plane][x] = game2D[z][x];
 			}
 		}
@@ -373,8 +412,8 @@ let game = {
 	 * @param {Array}   nextmap	  A 3D game
 	 */
 	storeZPlane: function(plane, game2D, nextmap) {
-		for (let y = 0; y < this.yDim; y++) {
-			for (let x = 0; x < this.xDim; x++) {
+		for (let y = 0; y < this.userInput.y; y++) {
+			for (let x = 0; x < this.userInput.x; x++) {
 				nextmap[plane][y][x] = game2D[y][x];
 			}
 		}
@@ -401,11 +440,11 @@ let game = {
 	getAxisSize: function(axis) {
 		switch(axis) {
 			case this.axis.X:
-			return this.xDim;
+			return this.userInput.x;
 			case this.axis.Y:
-			return this.yDim;
+			return this.userInput.y;
 			case this.axis.Z:
-			return this.zDim;
+			return this.userInput.z;
 		}
 	},
 	/**

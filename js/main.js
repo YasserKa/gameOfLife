@@ -1,8 +1,3 @@
-// Dimensions sizes
-let xDim = 3;
-let yDim = 3;
-let zDim = 3;
-
 const size = 5;
 let speed = 1;
 
@@ -27,6 +22,30 @@ const gameRules = {
     thirdD: '3D',
 };
 let rulesUsed = [];
+
+const mode = {
+    INITIAL: 0,
+    GENERATING: 1,
+    PLAYING: 2,
+    PAUSED: 3,
+};
+
+let myMode = mode.PAUSED;
+
+const generateWay = {
+    RANDOM: 'generateRandom',
+    USER: 'generateUser',
+    ALPHABET: 'generateAlpha',
+    LOAD: 'generateLoad',
+};
+
+let userInput = {
+    x: 3,
+    y: 3,
+    z: 3,
+    gameSelected: false,
+    generateWay: generateWay.RANDOM,
+};
 
 /**
  * Gets a random number
@@ -77,36 +96,39 @@ let objects;
 let myGame;
 
 let gameSize;
-let arrays, bufferInfo;
-
+let arrays;
+let bufferInfo;
+let buf;
+let alph;
 /**
  * Instantiate game logic and the cubes to be rendered
- * @param {Integer} xDimV        Size of x-dim
- * @param {Integer} yDimV        Size of y-dim
- * @param {Integer} zDimV        Size of z-dim
- * @param {any}     gameSelected Can be either a false or a map for a game
+ * @param {Object} userInput User's input data
  */
-function newGame (xDimV, yDimV, zDimV, gameSelected = false) {
+function newGame(userInputArg) {
     // No game to load
-    if (!gameSelected) {
-        xDim = xDimV;
-        yDim = yDimV;
-        zDim = zDimV;
-    } else {
-        xDim = gameSelected[0][0].length;
-        yDim = gameSelected[0].length;
-        zDim = gameSelected.length;
+    if (userInputArg.gameSelected) {
+        console.log(userInputArg);
+        userInput.x = userInputArg.gameSelected[0][0].length;
+        userInput.y = userInputArg.gameSelected[0].length;
+        userInput.z = userInputArg.gameSelected.length;
+        userInput.gameSelected = userInputArg.gameSelected;
+        userInput.generateWay = generateWay.LOAD;
     }
-    // gameSize = xDim * yDim * zDim;
     myGame = Object.create(game);
-    myGame.consutructor(xDim, yDim, zDim, gameSelected);
+    myGame.consutructor(userInput);
 
-    arrays = makeCells(size);
+    arrays = makeCells();
+    buf = arrays.on.data;
+    alph = arrays.alpha.data;
+    // console.log(arrays);
     bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
     requestAnimationFrame(render);
 }
 
 let then = 0;
+const cellColor = [0, 0, 0];
+
+
 
 /**
  * Renders the cubes
@@ -126,7 +148,6 @@ function render(time) {
 
     targetTimer -= elapsed;
 
-    const cellColor = [0, 0, 0];
     const fov = Math.PI * .25;
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = .01;
@@ -143,29 +164,14 @@ function render(time) {
     mat = m4.rotateX(mat, phi);
     mat = m4.rotateY(mat, theta);
 
-    const buf = arrays.on.data;
-    const alph = arrays.alpha.data;
-    if (targetTimer <= 0 && !paused) {
-        targetTimer = targetChangeInterval / speed;
-        let i = 0;
-        // To the next generation
-        if (rulesUsed.length > 0) {
-            myGame.nextGen();
-            setGameStatus();
-            myGame.resetStatus();
-            send(inGameAction.NAVIGATE);
-        }
-        for (let z = 0; z < myGame.zDim; z++) {
-            for (let y = 0; y < myGame.yDim; y++) {
-                for (let x = 0; x < myGame.xDim; x++) {
-                    alph[i] = (myGame.get3DNeigh(z, y, x) / 26) * 255;
-                    buf[i] = myGame.map[z][y][x] * 255;
-                    i++;
-                }
-            }
-        }
+    switch(myMode) {
+        case mode.PLAYING:
+            inGame();
+            break;
+        case mode.GENERATING:
+            inGenerate();
+            break;
     }
-
     gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.attribs.alpha.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, alph, gl.DYNAMIC_DRAW);
 
@@ -188,9 +194,37 @@ function render(time) {
     twgl.drawBufferInfo(gl, bufferInfo);
     requestAnimationFrame(render);
 }
-newGame(xDim, yDim, zDim);
 
+function inGenerate() {
+    updateCubes();
+}
+function inGame() {
+    if (targetTimer <= 0 && !paused) {
+        targetTimer = targetChangeInterval / speed;
+        // To the next generation
+        if (rulesUsed.length > 0) {
+            myGame.nextGen();
+            setGameStatus();
+            myGame.resetStatus();
+            send(inGameAction.NAVIGATE);
+        }
+        updateCubes();
+    }
+}
 
+function updateCubes() {
+    let i = 0;
+    for (let z = 0; z < userInput.z; z++) {
+        for (let y = 0; y < userInput.y; y++) {
+            for (let x = 0; x < userInput.x; x++) {
+                alph[i] = (myGame.get3DNeigh(z, y, x) / 26) * 255;
+                buf[i] = myGame.map[z][y][x] * 255;
+                i++;
+            }
+        }
+    }
+}
+newGame(userInput);
 
 /**
  * Generates the position of the vertices for the cell
@@ -241,16 +275,17 @@ function makeCells() {
     makeCell(arrays);
 
     let vertOffset = 0;
-    for (let z = 0; z < myGame.zDim; z++) {
+
+    for (let z = 0; z < userInput.z; z++) {
         const zoff = (z * 2);
-        for (let y = 0; y < myGame.yDim; y++) {
+        for (let y = userInput.y; y > 0; y--) {
             const yoff = (y * 2);
-            for (let x = 0; x < myGame.xDim; x++) {
+            for (let x = 0; x < userInput.x; x++) {
                 const xoff = (x * 2);
                 const offset3 = vertOffset * 3;
-                arrays.offset[offset3 + 0] = xoff - (xDim - 1);
-                arrays.offset[offset3 + 1] = yoff - (yDim - 1);
-                arrays.offset[offset3 + 2] = zoff - (zDim - 1);
+                arrays.offset[offset3 + 0] = xoff - (userInput.x - 1);
+                arrays.offset[offset3 + 1] = zoff - (userInput.z - 1);
+                arrays.offset[offset3 + 2] = yoff - (userInput.y - 1);
                 vertOffset++;
             }
         }
